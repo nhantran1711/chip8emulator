@@ -6,6 +6,8 @@
 typedef struct 
 {
     SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Event event;
 
 } sdl_t;
 
@@ -13,6 +15,8 @@ typedef struct
 {
     uint32_t window_width; // SDL Window width
     uint32_t window_height; // SDL Window height
+    uint32_t fg_color; // Foreground colour
+    uint32_t bg_color; // background colour
 } config_t;
 
 
@@ -24,7 +28,9 @@ bool set_config(config_t *config, const int argc, const char **argv) {
     // Set default
     *config = {
         64, // Origin X
-        32 // Origin Y
+        32, // Origin Y
+        0xFFFFFFFF, // White
+        0x00000000 // Black
     };
 
     // Override default values
@@ -53,14 +59,36 @@ bool init_sdl(sdl_t *sdl, const config_t config) {
         SDL_Log("Could not create SDL Window %s", SDL_GetError());
         return false;
     }
+
+    // Renderer
+    sdl -> renderer = SDL_CreateRenderer(sdl -> window, 01, SDL_RENDERER_ACCELERATED);
+    if (!sdl -> renderer) {
+        SDL_Log("Could not create SDL renderer %s", SDL_GetError());
+        return false;
+    }
     return true;
 }
 
 // Final clean up program
 void final_cleanup(sdl_t *sdl) {
     SDL_DestroyWindow(sdl -> window);
+    SDL_DestroyRenderer(sdl -> renderer);
     SDL_Quit(); // Shut up subsystem
 }
+
+// Clear screen
+void clear_screen(const config_t config) {
+    
+    // Int screen clear
+    const uint8_t r = (config.bg_color >> 24) & 0xFF; // Shift to 24 bits then mask it off
+    const uint8_t g = (config.bg_color >> 16) & 0xFF; // Shift to 16 bits then mask it off
+    const uint8_t b = (config.bg_color >> 8) & 0xFF; // Shift to 8 bits then mask it off
+    const uint8_t a = (config.bg_color >> 0) & 0xFF; // Shift to 0 bit then mask it off
+
+    SDL_SetRenderDrawColor(sdl.renderer, r, g, b, a);
+    SDL_RenderClear(sdl.renderer);
+}
+
 
 // Main method
 int main(int argc, char **argv) {
@@ -81,6 +109,14 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    // Init the function the clear screen / sdl window to background colour
+    clear_screen(config);
+
+
+    // Main emulator loop
+    while (true) {
+        SDL_PollEvent();
+    }
 
     // Final Cleanup
     final_cleanup(&sdl);
