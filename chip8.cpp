@@ -77,8 +77,8 @@ void final_cleanup(sdl_t *sdl) {
 }
 
 // Clear screen
-void clear_screen(const config_t config) {
-    
+void clear_screen(const config_t config, sdl_t sdl) {
+
     // Int screen clear
     const uint8_t r = (config.bg_color >> 24) & 0xFF; // Shift to 24 bits then mask it off
     const uint8_t g = (config.bg_color >> 16) & 0xFF; // Shift to 16 bits then mask it off
@@ -89,6 +89,11 @@ void clear_screen(const config_t config) {
     SDL_RenderClear(sdl.renderer);
 }
 
+// Update screen with changes
+void update_screen(const sdl_t sdl) {
+    SDL_RenderPresent(sdl.renderer);
+}
+
 
 // Main method
 int main(int argc, char **argv) {
@@ -96,7 +101,7 @@ int main(int argc, char **argv) {
     (void)argc;
     (void)argv;
 
-    sdl_t sdl = {0};
+    sdl_t sdl = {0, 0};
     
     // Init emulater configs
     config_t config = {0, 0};
@@ -110,12 +115,16 @@ int main(int argc, char **argv) {
     }
 
     // Init the function the clear screen / sdl window to background colour
-    clear_screen(config);
+    clear_screen(config, sdl);
 
 
     // Main emulator loop
     while (true) {
-        SDL_PollEvent();
+        // Delay for 60fps
+        SDL_Delay();
+
+        // Update the window with changes
+        update_screen(sdl);
     }
 
     // Final Cleanup
