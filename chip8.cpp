@@ -11,8 +11,8 @@ typedef struct
 
 typedef struct 
 {
-    uint32_t window_height; // SDL Window width
-    uint32_t window_width; // SDL Window Height
+    uint32_t window_width; // SDL Window width
+    uint32_t window_height; // SDL Window height
 } config_t;
 
 
@@ -22,15 +22,16 @@ typedef struct
 bool set_config(config_t *config, const int argc, const char **argv) {
 
     // Set default
-    *config = (config_t) {
-        .window_width = 64, // Origin X
-        .window_height = 32 // Origin Y
+    *config = {
+        64, // Origin X
+        32 // Origin Y
     };
 
     // Override default values
     for (int i = 1; i <  argc; i ++) {
         (void)argv[i]; // Prevent compiler error from unused variables
     }
+    return true;
 }
 
 
@@ -43,11 +44,9 @@ bool init_sdl(sdl_t *sdl, const config_t config) {
 
     sdl -> window = SDL_CreateWindow(
         "SDL 3 Window ", // Window title
-        SDL_WINDOWPOS_CENTERED, // X pos
-        SDL_WINDOWPOS_CENTERED, // Y pos
         config.window_width, // Width, in pixel
         config.window_height, // Height, in pixel
-        SDL_Window_OPENGL // Flags
+        SDL_WINDOW_OPENGL // Flags
     );
 
     if (!sdl -> window) {
@@ -58,8 +57,8 @@ bool init_sdl(sdl_t *sdl, const config_t config) {
 }
 
 // Final clean up program
-void final_cleanup(sdl_t sdl) {
-    SDL_DestroyWindow(sdl.window);
+void final_cleanup(sdl_t *sdl) {
+    SDL_DestroyWindow(sdl -> window);
     SDL_Quit(); // Shut up subsystem
 }
 
@@ -70,12 +69,10 @@ int main(int argc, char **argv) {
     (void)argv;
 
     sdl_t sdl = {0};
-    bool done = false;
-
     
     // Init emulater configs
-    config_t config = {0};
-    if (!set_config(&config, argc, argv)) {
+    config_t config = {0, 0};
+    if (!set_config(&config, argc, (const char**)argv)) {
         exit(EXIT_FAILURE);
     }
 
