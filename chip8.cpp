@@ -61,7 +61,7 @@ bool init_sdl(sdl_t *sdl, const config_t config) {
     }
 
     // Renderer
-    sdl -> renderer = SDL_CreateRenderer(sdl -> window, 01, SDL_RENDERER_ACCELERATED);
+    sdl -> renderer = SDL_CreateRenderer(sdl -> window, NULL);
     if (!sdl -> renderer) {
         SDL_Log("Could not create SDL renderer %s", SDL_GetError());
         return false;
