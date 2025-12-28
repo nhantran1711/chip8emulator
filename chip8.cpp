@@ -27,8 +27,8 @@ bool set_config(config_t *config, const int argc, const char **argv) {
 
     // Set default
     *config = {
-        64, // Origin X
-        32, // Origin Y
+        640, // Origin X
+        320, // Origin Y
         0xFFFFFFFF, // White
         0x00000000 // Black
     };
@@ -43,8 +43,12 @@ bool set_config(config_t *config, const int argc, const char **argv) {
 
 // Init SDL
 bool init_sdl(sdl_t *sdl, const config_t config) {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-        SDL_Log("Could not init SDL subsystem: %s" , SDL_GetError());
+
+    SDL_SetMainReady();
+
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+        // SDL3 returns true on success, false on failure
+        SDL_Log("Could not init SDL subsystem: %s", SDL_GetError());
         return false;
     }
 
@@ -52,7 +56,7 @@ bool init_sdl(sdl_t *sdl, const config_t config) {
         "SDL 3 Window ", // Window title
         config.window_width, // Width, in pixel
         config.window_height, // Height, in pixel
-        SDL_WINDOW_OPENGL // Flags
+        0 // Flags
     );
 
     if (!sdl -> window) {
@@ -119,9 +123,21 @@ int main(int argc, char **argv) {
 
 
     // Main emulator loop
-    while (true) {
+    bool running = true;
+    while (running) {
+        // Event
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {  // Poll events from SDL
+            if (event.type == SDL_EVENT_QUIT) {  // Check for close window event
+                running = false;
+            }
+        }
+
         // Delay for 60fps
         SDL_Delay(60);
+
+        // Clear screen
+        clear_screen(config, sdl);
 
         // Update the window with changes
         update_screen(sdl);
