@@ -44,8 +44,19 @@ typedef struct
     uint16_t PC; // Program Counter
     bool keypad[16]; // Key pad 0x0-0xF
     const char *rom_name; // Current rom name
+    instruction_t inst; // Current chip 8 instruction
     
 } chip8_t;
+
+// CHIP8 Instruction format
+typedef struct {
+    uint16_t opcode;
+    uint16_t NNN; // 12 bit address
+    uint8_t NN;  // 8 bit
+    uint8_t N; // 4 bit
+    uint8_t X;  // 4 bit register identifier
+    uint8_t Y;  // 4 bit register identifier
+} instruction_t;
 
 
 
@@ -165,6 +176,12 @@ void handle_input(chip8_t *chip8) {
     }
 }
 
+// Emulate 1 chip 8 instuctions
+void emulator_instructions(chip8_t *chip8) {
+    opcodes
+}
+
+
 // Handle chip 8 init
 bool init_chip8(chip8_t *chip8, const char rom_name[]) {
     // Entry point
@@ -271,9 +288,13 @@ int main(int argc, char **argv) {
         
         handle_input(&chip8);
 
+        // If the state is being paused, skip
         if (chip8.state == PAUSE) {
             continue;
         }
+
+        // Instruction for chip 8
+        emulator_instructions(&chip8);
 
         // Delay for 60fps
         SDL_Delay(60);
