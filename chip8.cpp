@@ -142,6 +142,17 @@ void handle_input(chip8_t *chip8) {
                 chip8->state = QUIT;
                 return;
             }
+            // Space bar
+            else if (event.key.key == SDLK_SPACE) {
+                if (chip8->state == RUNNING) {
+                    chip8->state = PAUSE;
+                    puts("=====PAUSED=====");
+                }
+                else {
+                    chip8->state = RUNNING;
+                }
+                return;
+            }
 
             break;
 
@@ -254,6 +265,10 @@ int main(int argc, char **argv) {
     while (chip8.state != QUIT) {
         
         handle_input(&chip8);
+
+        if (chip8.state == PAUSE) {
+            continue;
+        }
 
         // Delay for 60fps
         SDL_Delay(60);
