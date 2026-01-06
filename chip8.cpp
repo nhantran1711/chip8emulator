@@ -233,6 +233,11 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
 
 // Main method
 int main(int argc, char **argv) {
+    // Default usage message for args
+    if (argc < 2) {
+        fprintf(stderr, "Usage: Load rom name", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
     (void)argc;
     (void)argv;
