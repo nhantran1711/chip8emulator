@@ -43,7 +43,7 @@ typedef struct
     uint8_t sound_timer; // Decrement at 60hz and play tones > 0
     uint16_t PC; // Program Counter
     bool keypad[16]; // Key pad 0x0-0xF
-    char *rom_name; // Current rom name
+    const char *rom_name; // Current rom name
     
 } chip8_t;
 
@@ -190,7 +190,7 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
     // Get/check rom size
     fseek(rom, 0, SEEK_END);
     const size_t rom_size = ftell(rom);
-    const size_t max_size = sizeof chip8_>ram - entry_point;
+    const size_t max_size = sizeof chip8->ram - entry_point;
     rewind(rom);
 
     // Checking rom size
@@ -205,7 +205,7 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
         return false;
     };
 
-    fclose(rom)
+    fclose(rom);
 
     // Default as running
     chip8->state = RUNNING; 
@@ -236,7 +236,8 @@ int main(int argc, char **argv) {
 
     // Init chip 8 machine
     chip8_t chip8 = {};
-    if (!init_chip8(&chip8)) {
+    const char *rom_name =  argv[1];
+    if (!init_chip8(&chip8, rom_name)) {
         exit(EXIT_FAILURE);
     }
 
