@@ -175,17 +175,41 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
         0xE0, 0x90, 0x90, 0x90, 0xE0,		// D
         0xF0, 0x80, 0xF0, 0x80, 0xF0,		// E
         0xF0, 0x80, 0xF0, 0x80, 0x80		// F
-    } 
+    }; 
 
     // Default as running
     chip8->state = RUNNING; 
     chip8->PC = entry_point;
 
     // Load font
+    memcpy(&chip8->ram[0], font, sizeof(font));
 
     // Load ROM to chip8
+    FILE *rom = fopen(rom_name, "rb");
+    if (!rom ) {
+        SDL_Log("Could not open rom file");
+        return false;
+    }
 
-    // Set chip8 default
+    // Get/check rom size
+    fseek(rom, 0, SEEK_END);
+    const size_t rom_size = ftell(rom);
+    const size_t max_size = sizeof chip8_>ram - entry_point;
+    rewind(rom);
+
+    // Checking rom size
+    if (rom_size > max_size) {
+        SDL_Log("Too big of rom file");
+        return false;
+    }
+
+    // Load Rom
+    if (fread(&chip8->ram[entry_point], rom_size, 1, rom) != 1) {
+        SDL_Log("Can not read rom file to chip 8 memory");
+        return false;
+    };
+
+    fclost(rom)
 
     return true;
 }
