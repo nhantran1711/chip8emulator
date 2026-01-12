@@ -30,6 +30,16 @@ typedef enum
     PAUSE
 } emulator_state_t;
 
+// CHIP8 Instruction format
+typedef struct {
+    uint16_t opcode;
+    uint16_t NNN; // 12 bit address
+    uint8_t NN;  // 8 bit
+    uint8_t N; // 4 bit
+    uint8_t X;  // 4 bit register identifier
+    uint8_t Y;  // 4 bit register identifier
+} instruction_t;
+
 // Chip 8 Object
 typedef struct 
 {
@@ -37,6 +47,7 @@ typedef struct
     uint8_t ram[4096];
     bool display[64 * 32]; // original chip 8 resolution
     uint16_t stack[12]; // Subroutine stack
+    uint16_t *stack_ptr;
     uint8_t V[16]; // Data Register
     uint16_t I; // Index Register
     uint8_t delay_timer; // Decrement at 60hz wheb > 0
@@ -48,15 +59,7 @@ typedef struct
     
 } chip8_t;
 
-// CHIP8 Instruction format
-typedef struct {
-    uint16_t opcode;
-    uint16_t NNN; // 12 bit address
-    uint8_t NN;  // 8 bit
-    uint8_t N; // 4 bit
-    uint8_t X;  // 4 bit register identifier
-    uint8_t Y;  // 4 bit register identifier
-} instruction_t;
+
 
 
 
@@ -65,11 +68,11 @@ bool set_config(config_t *config, const int argc, const char **argv) {
 
     // Set default
     *config = {
-        640, // Origin X
-        320, // Origin Y
+        64, // Origin X
+        32, // Origin Y
         0xFFFFFFFF, // White
         0x00000000, // Black
-        20 // Scale Factor
+        10 // Scale Factor
     };
 
     // Override default values
@@ -176,10 +179,41 @@ void handle_input(chip8_t *chip8) {
     }
 }
 
+#ifdef DEBUG
+void print_dedub_info(chip_t *chip8) {
+    printf("Address: 0x%04X, Opcode: 0x%04X Desc: ", chip8->PC - 2, chip8->inst.opcode);
+    switch ((chip8->inst.opcode >> 12) & 0x0F)
+    {
+        case 0x00:
+            if (chip8->inst.NN == 0xE0) {
+                // clear screen 0x00E0
+                printf("clear screen");
+                
+            }
+            else if (chip8->inst.NN == 0xEE) {
+                // Return from subroutine
+                prinf("Return from subroutine from address 0x%04X\n", *(chip8->stack_ptr - 1));
+                chip8->PC = *--chip8->stack_ptr;
+            }
+        case 0x02:
+            // call subroutine 0x2NNN at NNN
+            *chip8->stack_ptr = chip8->PC; // store current address to return on subroutine address
+            chip8->PC = chip8->inst.NNN; // set program ciunter to subroutine address
+
+            break;
+    default:
+        printf("Unimplemented opcode. \n");
+        break; // Invalid opcode
+    }
+}
+#endif
+
+
+
 // Emulate 1 chip 8 instuctions
 void emulator_instructions(chip8_t *chip8) {
     // Get the next opcode from RAM
-    chip8->inst.opcode = (chip8->ram[chip8 -> PC] << 8) | (chip8 -> ram[PC + 1]);
+    chip8->inst.opcode = (chip8->ram[chip8 -> PC] << 8) | (chip8 -> ram[chip8->PC + 1]);
 
     // Pre increment program counter
     chip8->PC += 2; 
@@ -197,12 +231,13 @@ void emulator_instructions(chip8_t *chip8) {
         case 0x00:
             if (chip8->inst.NN == 0xE0) {
                 // clear screen 0x00E0
-                memset(chip8->display[0], false, sizeof chip8->display);
+                memset(chip8->display, 0, sizeof chip8->display);
             }
             else if (chip8->inst.NN == 0xEE) {
                 // Return from subroutine
                 chip8->PC = *--chip8->stack_ptr;
             }
+            break;
         case 0x02:
             // call subroutine 0x2NNN at NNN
             *chip8->stack_ptr = chip8->PC; // store current address to return on subroutine address
@@ -272,7 +307,7 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
     chip8->state = RUNNING; 
     chip8->PC = entry_point;
     chip8->rom_name = rom_name;
-    chip8->stack_ptr = &chip8->stack[0];
+    chip8->stack_ptr = chip8->stack;
 
     return true;
 }
@@ -286,7 +321,7 @@ bool init_chip8(chip8_t *chip8, const char rom_name[]) {
 int main(int argc, char **argv) {
     // Default usage message for args
     if (argc < 2) {
-        fprintf(stderr, "Usage: Load rom name", argv[0]);
+        fprintf(stderr, "Usage: %s <rom>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
