@@ -180,7 +180,7 @@ void handle_input(chip8_t *chip8) {
 }
 
 #ifdef DEBUG
-void print_dedub_info(chip_t *chip8) {
+void print_debug_info(chip8_t *chip8) {
     printf("Address: 0x%04X, Opcode: 0x%04X Desc: ", chip8->PC - 2, chip8->inst.opcode);
     switch ((chip8->inst.opcode >> 12) & 0x0F)
     {
@@ -192,7 +192,7 @@ void print_dedub_info(chip_t *chip8) {
             }
             else if (chip8->inst.NN == 0xEE) {
                 // Return from subroutine
-                prinf("Return from subroutine from address 0x%04X\n", *(chip8->stack_ptr - 1));
+                printf("Return from subroutine from address 0x%04X\n", *(chip8->stack_ptr - 1));
                 chip8->PC = *--chip8->stack_ptr;
             }
         case 0x02:
@@ -364,6 +364,11 @@ int main(int argc, char **argv) {
 
         // Instruction for chip 8
         emulator_instructions(&chip8);
+
+        // Print debug info
+        #ifdef DEBUG
+        print_debug_info(&chip8);
+        #endif
 
         // Delay for 60fps
         SDL_Delay(60);
