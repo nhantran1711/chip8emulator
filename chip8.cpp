@@ -281,32 +281,63 @@ void print_debug_info(chip8_t *chip8) {
 
         case 0x08: {
             switch(chip8->inst.N) {
-                case 0:
+                case 0: // 8XY0: Vx = Vy
                     chip8->V[chip8->inst.X] = chip8->V[chip8->inst.Y];
+                    printf("Set V%X = V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
-                case 1:
+
+                case 1: // 8XY1: Vx |= Vy
                     chip8->V[chip8->inst.X] |= chip8->V[chip8->inst.Y];
+                    printf("Set V%X |= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
-                case 2:
+
+                case 2: // 8XY2: Vx &= Vy
                     chip8->V[chip8->inst.X] &= chip8->V[chip8->inst.Y];
+                    printf("Set V%X &= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
-                case 3:
+
+                case 3: // 8XY3: Vx ^= Vy
                     chip8->V[chip8->inst.X] ^= chip8->V[chip8->inst.Y];
+                    printf("Set V%X ^= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
-                case 4:
-                    chip8->V[0xF] = ((uint16_t)(chip8->V[chip8->inst.X] + chip8->V[chip8->inst.Y]) > 255) ? 1 : 0;
+
+                case 4: // 8XY4: Vx += Vy, VF = carry
+                    chip8->V[0xF] = ((uint16_t)chip8->V[chip8->inst.X] + chip8->V[chip8->inst.Y] > 0xFF) ? 1 : 0;
                     chip8->V[chip8->inst.X] += chip8->V[chip8->inst.Y];
+                    printf("V%X += V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
-                case 5:
+
+                case 5: // 8XY5: Vx -= Vy, VF = NOT borrow
                     chip8->V[0xF] = (chip8->V[chip8->inst.X] >= chip8->V[chip8->inst.Y]) ? 1 : 0;
                     chip8->V[chip8->inst.X] -= chip8->V[chip8->inst.Y];
+                    printf("V%X -= V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
+
+                case 6: // 8XY6: Vx >>= 1, VF = LSB
+                    chip8->V[0xF] = chip8->V[chip8->inst.X] & 1;
+                    chip8->V[chip8->inst.X] >>= 1;
+                    printf("V%X >>= 1 -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
+                    break;
+
+                case 7: // 8XY7: Vx = Vy - Vx, VF = NOT borrow
+                    chip8->V[0xF] = (chip8->V[chip8->inst.Y] >= chip8->V[chip8->inst.X]) ? 1 : 0;
+                    chip8->V[chip8->inst.X] = chip8->V[chip8->inst.Y] - chip8->V[chip8->inst.X];
+                    printf("V%X = V%X - V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
+                    break;
+
+                case 8: // 8XY8: Vx <<= 1, VF = MSB
+                    chip8->V[0xF] = (chip8->V[chip8->inst.X] & 0x80) >> 7;
+                    chip8->V[chip8->inst.X] <<= 1;
+                    printf("V%X <<= 1 -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
+                    break;
+
                 default:
                     printf("Unknown 0x8XYN opcode: 0x%X\n", chip8->inst.N);
                     break;
             }
-            break; // break for outer case 0x08
+            break;
         }
+
 
 
         case 0x0A:
@@ -439,8 +470,27 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
                     break;
 
                 case 5: // VX -= VY, VF = NOT borrow
-                    chip8->V[0xF] = (chip8->V[chip8->inst.X] >= chip8->V[chip8->inst.Y]) ? 1 : 0;
+                    chip8->V[0xF] = (chip8->V[chip8->inst.Y] <= chip8->V[chip8->inst.X]) ? 1 : 0;
                     chip8->V[chip8->inst.X] -= chip8->V[chip8->inst.Y];
+                    break;
+                
+                case 6:
+                    // 0x08XY6:
+                    chip8->V[0xF] = chip8->V[chip8->inst.X] & 1;
+                    chip8->V[chip8->inst.X] >>= 1;
+                    break;
+                
+                case 7:
+                    // 0x08XY7              
+                    chip8->V[0xF] = (chip8->V[chip8->inst.X] <= chip8->V[chip8->inst.Y]) ? 1 : 0;
+                    chip8->V[chip8->inst.X] = chip8->V[chip8->inst.Y] - chip8->V[chip8->inst.X];
+
+                    break;
+
+                case 8:
+                    // 0x08XY8
+                    chip8->V[0xF] = (chip8->V[chip8->inst.X] & 0x80) >> 7;
+                    chip8->V[chip8->inst.X] <<= 1;
                     break;
 
                 default:
