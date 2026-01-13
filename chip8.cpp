@@ -242,7 +242,12 @@ void print_debug_info(chip8_t *chip8) {
         
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
-            printf("Set register V%X to NN (0x%02X)\n", chip8->inst.X, chip8->inst.NN);
+            printf("Set register V%X = NN (0x%02X)\n", chip8->inst.X, chip8->inst.NN);
+            break;
+
+        case 0x07:
+            // 0x7XNN: Set register VC += to NN
+            printf("Set register V%X (0x%02X)+= NN (0x%02X)\n", chip8->inst.X, chip8->inst.NN);
             break;
 
         case 0x0A:
@@ -305,6 +310,11 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
             chip8->V[chip8->inst.X] = chip8->inst.NN;
+            break;
+        
+        case 0x07:
+            // 0x7XNN: Set register VC += to NN
+            chip8->V[chip8->inst.X] += chip8->inst.NN;
             break;
         
         case 0x0A:
