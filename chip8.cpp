@@ -68,7 +68,7 @@ typedef struct
 bool set_config(config_t *config, const int argc, const char **argv) {
 
     // Set default
-    *config = {
+    *config = config_t{
         64, // Origin X
         32, // Origin Y
         0xFFFFFFFF, // White
@@ -230,13 +230,12 @@ void print_debug_info(chip8_t *chip8) {
         case 0x00:
             if (chip8->inst.NN == 0xE0) {
                 // clear screen 0x00E0
-                printf("clear screen");
+                printf("clear screen\n");
                 
             }
             else if (chip8->inst.NN == 0xEE) {
                 // Return from subroutine
                 printf("Return from subroutine from address 0x%04X\n", *(chip8->stack_ptr - 1));
-                chip8->PC = *--chip8->stack_ptr;
             }
             else {
                 printf("Unimplemented opcode. \n");
@@ -249,24 +248,23 @@ void print_debug_info(chip8_t *chip8) {
             
         case 0x02:
             // call subroutine 0x2NNN at NNN
-            *chip8->stack_ptr = chip8->PC; // store current address to return on subroutine address
-            chip8->PC = chip8->inst.NNN; // set program ciunter to subroutine address
+            printf("Called subroutine\n");
 
             break;
 
         case 0x03:
             // 0x03XNN: Check if VX == NN, if so, skip to next instruction
-            printf("Check if V%X == NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
+            printf("Check if V%X == NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X]);
             break;
 
         case 0x04:
             // 0x03XNN: Check if VX == NN, if so, skip to next instruction
-            printf("Check if V%X != NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
+            printf("Check if V%X != NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X]);
             break;
 
         case 0x05:
             // 0x03XY0: Check if VX == VY,  if so, skip the next instruction
-            printf("Check if V%X == V%X (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.Y, chip8->V[chip8->inst.Y]);
+            printf("Check if V%X == V%X (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.Y);
             break;
         
         case 0x06:
@@ -282,52 +280,47 @@ void print_debug_info(chip8_t *chip8) {
         case 0x08: {
             switch(chip8->inst.N) {
                 case 0: // 8XY0: Vx = Vy
-                    chip8->V[chip8->inst.X] = chip8->V[chip8->inst.Y];
+                    
                     printf("Set V%X = V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
 
                 case 1: // 8XY1: Vx |= Vy
-                    chip8->V[chip8->inst.X] |= chip8->V[chip8->inst.Y];
+                    
                     printf("Set V%X |= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
 
                 case 2: // 8XY2: Vx &= Vy
-                    chip8->V[chip8->inst.X] &= chip8->V[chip8->inst.Y];
+                    
                     printf("Set V%X &= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
 
                 case 3: // 8XY3: Vx ^= Vy
-                    chip8->V[chip8->inst.X] ^= chip8->V[chip8->inst.Y];
+                    
                     printf("Set V%X ^= V%X (0x%02X)\n", chip8->inst.X, chip8->inst.Y, chip8->V[chip8->inst.X]);
                     break;
 
                 case 4: // 8XY4: Vx += Vy, VF = carry
-                    chip8->V[0xF] = ((uint16_t)chip8->V[chip8->inst.X] + chip8->V[chip8->inst.Y] > 0xFF) ? 1 : 0;
-                    chip8->V[chip8->inst.X] += chip8->V[chip8->inst.Y];
+                    
                     printf("V%X += V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
 
                 case 5: // 8XY5: Vx -= Vy, VF = NOT borrow
-                    chip8->V[0xF] = (chip8->V[chip8->inst.X] >= chip8->V[chip8->inst.Y]) ? 1 : 0;
-                    chip8->V[chip8->inst.X] -= chip8->V[chip8->inst.Y];
+                    
                     printf("V%X -= V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
 
                 case 6: // 8XY6: Vx >>= 1, VF = LSB
-                    chip8->V[0xF] = chip8->V[chip8->inst.X] & 1;
-                    chip8->V[chip8->inst.X] >>= 1;
+                    
                     printf("V%X >>= 1 -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
 
                 case 7: // 8XY7: Vx = Vy - Vx, VF = NOT borrow
-                    chip8->V[0xF] = (chip8->V[chip8->inst.Y] >= chip8->V[chip8->inst.X]) ? 1 : 0;
-                    chip8->V[chip8->inst.X] = chip8->V[chip8->inst.Y] - chip8->V[chip8->inst.X];
+                    
                     printf("V%X = V%X - V%X -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.Y, chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
 
                 case 8: // 8XY8: Vx <<= 1, VF = MSB
-                    chip8->V[0xF] = (chip8->V[chip8->inst.X] & 0x80) >> 7;
-                    chip8->V[chip8->inst.X] <<= 1;
+                    
                     printf("V%X <<= 1 -> V%X = 0x%02X, VF = %d\n", chip8->inst.X, chip8->inst.X, chip8->V[chip8->inst.X], chip8->V[0xF]);
                     break;
 
@@ -349,9 +342,14 @@ void print_debug_info(chip8_t *chip8) {
 
             break;
 
+        case 0x0B:
+            // Jump to V0 + NNN
+            printf("Set PC to V0 t(0x%02X) + NNN (0x%04X)\n", chip8->V[0], chip8->inst.NNN);
+            break;
+
         case 0x0D:
             // Draw at N coords
-            printf("Draw N (%d) at height sprite at coords V%X (0x%02X), V%X (0x%02X) from memory location I (0x%04X)", 
+            printf("Draw N (%d) at height sprite at coords V%X (0x%02X), V%X (0x%02X) from memory location I (0x%04X)\n", 
                 chip8->inst.N, chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.Y, chip8->V[chip8->inst.Y], chip8->I
             );
             break;
@@ -406,7 +404,7 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
             
         case 0x02:
             // call subroutine 0x2NNN at NNN
-            *chip8->stack_ptr = chip8->PC; // store current address to return on subroutine address
+            *chip8->stack_ptr++ = chip8->PC; // store current address to return on subroutine address
             chip8->PC = chip8->inst.NNN; // set program ciunter to subroutine address
 
             break;
@@ -433,7 +431,7 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
             } 
 
             // Skip to next instruction
-            if (chip8->V[chip8->inst.X] == chip8->inst.Y) {
+            if (chip8->V[chip8->inst.X] == chip8->V[chip8->inst.Y]) {
                 chip8->PC += 2;
             }
             break;
@@ -514,6 +512,11 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
         case 0x0A:
             // 0xANNN: Set index register I to NNN
             chip8->I = chip8->inst.NNN;
+            break;
+        
+        case 0x0B:
+            // Jump to V0 + NNN
+            chip8->PC = chip8->V[0] + chip8->inst.NNN;
             break;
         
         case 0x0D:
