@@ -247,7 +247,7 @@ void print_debug_info(chip8_t *chip8) {
 
         case 0x07:
             // 0x7XNN: Set register VC += to NN
-            printf("Set register V%X (0x%02X)+= NN (0x%02X)\n", chip8->inst.X, chip8->inst.NN);
+            printf("Set register V%X (0x%02X) += NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
             break;
 
         case 0x0A:
@@ -355,10 +355,10 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
                     *pixel ^= sprite_bit;
                     X_coord++;
 
-                    // Stop drawing if hit right edge
-                    if (++X_coord >= config.window_width) {
-                        break;
-                    }
+                    // // Stop drawing if hit right edge
+                    // if (X_coord >= config.window_width) {
+                    //     break;
+                    // }
                 }
                 // Stop drawing when we hit the bottom edge
                 if (++Y_coord >= config.window_height) {
