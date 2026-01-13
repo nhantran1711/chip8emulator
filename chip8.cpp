@@ -156,8 +156,8 @@ void update_screen(const sdl_t sdl, const config_t config, const chip8_t chip8) 
         // translate index i to 2d x/y coords
         // x = i % widdow_width
         // y = i / window_width
-        rect.x = i % config.window_width;
-        rect.y = i / config.window_width;
+        rect.x = (i % config.window_width) * config.scale_factor;
+        rect.y = (i / config.window_width) * config.scale_factor;
 
         // If the pixel is on, draw foreground
         if (chip8.display[i]) {
