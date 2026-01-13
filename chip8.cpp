@@ -253,6 +253,16 @@ void print_debug_info(chip8_t *chip8) {
             chip8->PC = chip8->inst.NNN; // set program ciunter to subroutine address
 
             break;
+
+        case 0x03:
+            // 0x03XNN: Check if VX == NN, if so, skip to next instruction
+            printf("Check if V%X == NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
+            break;
+
+        case 0x04:
+            // 0x03XNN: Check if VX == NN, if so, skip to next instruction
+            printf("Check if V%X != NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
+            break;
         
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
@@ -313,6 +323,11 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
                 // Return from subroutine
                 chip8->PC = *--chip8->stack_ptr;
             }
+
+            else {
+                // Unimplemented opcode
+                break;
+            }
             break;
         
         case 0x01:
@@ -326,6 +341,21 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
             chip8->PC = chip8->inst.NNN; // set program ciunter to subroutine address
 
             break;
+        
+        case 0x03:
+            // 0x03XNN: Check if VX == NN, if so, skip to next instruction
+            if (chip8->V[chip8->inst.X] == chip8->inst.NN) {
+                chip8->PC += 2;
+            }
+
+            break;
+        
+        case 0x04:
+            // 0x03XNN: check if VX != NN, if so, skip to next instruction
+            if (chip8->V[chip8->inst.X] != chip8->inst.NN) {
+                chip8->PC += 2;
+            }
+
         
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
