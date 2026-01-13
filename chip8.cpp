@@ -263,6 +263,11 @@ void print_debug_info(chip8_t *chip8) {
             // 0x03XNN: Check if VX == NN, if so, skip to next instruction
             printf("Check if V%X != NN (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.NN);
             break;
+
+        case 0x05:
+            // 0x03XY0: Check if VX == VY,  if so, skip the next instruction
+            printf("Check if V%X == V%X (0x%02X)\n", chip8->inst.X, chip8->V[chip8->inst.X], chip8->inst.Y, chip8->V[chip8->inst.Y]);
+            break;
         
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
@@ -355,7 +360,19 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
             if (chip8->V[chip8->inst.X] != chip8->inst.NN) {
                 chip8->PC += 2;
             }
+            break;
+        
+        case 0x05:
+            // 0x03XY0: Check if VX == VY,  if so, skip the next instruction
+            if (chip8->inst.N != 0) { // Wrong opcode
+                break;
+            } 
 
+            // Skip to next instruction
+            if (chip8->V[chip8->inst.X] == chip8->inst.Y) {
+                chip8->PC += 2;
+            }
+            break;
         
         case 0x06:
             // 0x6XNN: Set reigster VX to NN
