@@ -2,6 +2,7 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <time.h>
 
 // SDL Container object
 typedef struct 
@@ -347,6 +348,11 @@ void print_debug_info(chip8_t *chip8) {
             printf("Set PC to V0 t(0x%02X) + NNN (0x%04X)\n", chip8->V[0], chip8->inst.NNN);
             break;
 
+        case 0x0C:
+            // Sets reigster VX = rand() % 256 & NN
+            printf("Set V%X = rand() %% 256 & NN (0x%02X) \n", chip8->inst.X, chip8->inst.NN);
+            break;
+
         case 0x0D:
             // Draw at N coords
             printf("Draw N (%d) at height sprite at coords V%X (0x%02X), V%X (0x%02X) from memory location I (0x%04X)\n", 
@@ -519,6 +525,11 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
             chip8->PC = chip8->V[0] + chip8->inst.NNN;
             break;
         
+        case 0x0C:
+            // Sets reigster VX = rand() % 256 & NN
+            chip8->V[chip8->inst.X] = (rand() % 256) & chip8->inst.NN;
+            break;
+        
         case 0x0D:
             // 0xDXYN: Draw N height sprite at coords X and Y
             // Read from memory location I
@@ -670,6 +681,9 @@ int main(int argc, char **argv) {
 
     // Init the function the clear screen / sdl window to background colour
     clear_screen(config, sdl);
+
+    // srand
+    srand(time(NULL));
 
 
     // Main emulator loop
