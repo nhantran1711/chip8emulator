@@ -50,7 +50,7 @@ git clone https://github.com/nhantran1711/chip8emulator.git
 cd chip8emulator
 
 ```
-
+---
 
 ## Folder Structure
 
@@ -84,11 +84,16 @@ Make sure you are in the project root folder (chip8emulator) before running:
 make
 ```
 
+<<<<<<< HEAD
 
 This will generate executable ./chip8 file 
 
 # Development Build
 
+=======
+---
+## Debug 
+>>>>>>> 1b4e84b7a378d75371a7b9cf9f04f8a44bb91ab9
 
 ```bash
 make debug
