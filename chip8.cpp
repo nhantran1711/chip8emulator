@@ -766,6 +766,19 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
                 // I += VX, Add VX to register I.
                 chip8->I += chip8->V[chip8->inst.X];
                 break;
+            
+
+            case 0X07:
+                // VX = delay timer
+                chip8->V[chip8->inst.X] = chip8->delay_timer;
+                break;
+
+            
+            case 0x15;
+                // delay timer = VX
+                chip8->delay_timer = chip8->V[chip8->inst.X];
+                break;
+            
             default:
                 break;
             }}
