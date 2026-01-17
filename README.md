@@ -1,75 +1,146 @@
 # Chip-8 Emulator
 
-This is my personal Chip-8 emulator project written in C++.  
+This is my personal **Chip-8 emulator** project written in C++.  
 I am currently learning C++ and decided to build this emulator from scratch.  
-The project uses **C++ 17 (GCC 15.2.0)** and **SDL3** for graphics and input.
+The project uses **C++17 (GCC 15.2.0)** and **SDL3** for graphics and input.
+
+---
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Folder Structure](#folder-structure)
+- [Building the Emulator](#building-the-emulator)
+- [Running a ROM](#running-a-rom)
+- [Debug Mode](#debug-mode)
+- [Cleaning the Build](#cleaning-the-build)
+- [Documentation & References](#documentation--references)
 
 ---
 
 ## Installation
 
-Right now the provided installation only works on MacOS system, I figured Ubuntu/Linux user can find the away to install g++ , make, and sdl3 on the internet. 
+> **Note:** These instructions are for **macOS**. Linux users can install `g++`, `make`, and `SDL3` using their package manager. Windows support is not fully tested and may be buggy.
 
-Sorry windows users, it will get buggy.
-
-Install Homebrew (if not already installed):
+### Step 1: Install Homebrew (if not already installed)
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Install SDL3:
 
+### Step 2: Install SDL3
 
 ```bash
 brew install sdl3
+
 ```
 
 
-Install g++ and make (if not already installed):
-
-
+### Step 3: Install g++ and make (if havent)
 ```bash
 brew install gcc make
 ```
 
 
-Clone github
 
+### Step 4: Clone this repo
 ```bash
 git clone https://github.com/nhantran1711/chip8emulator.git
 cd chip8emulator
+
 ```
 
 
-## Running application
+## Folder Structure
 
-Making sure that you are on the **same folder** as ./chip8, or else it won't work
+```bash
+chip8emulator/
+├─ chip8.cpp          # Main emulator source code
+├─ Makefile           # Makefile for building and debugging
+├─ roms/              # Place your Chip-8 ROM files here
+│   └─ invaders.rom 
+├─ test/              # Optional test ROMs or scripts
+├─ README.md          # This file
+├─ chip8              # Compiled executable (after make)
+└─ chip8.dSYM         # Debug symbols (MacOS, after debug build)
+```
 
-Making sure that when run _make_, it shouldn't scream any issue, if it does, please make an issue ticket
+Place all ROM files you want to run in the roms/ folder.
 
-otherwise, run ./chip8
+test/ can hold any ROMs or testing scripts you want to try.
+
+
+## Building emulator
+
+Make sure you are in the project root folder (chip8emulator) before running:
+
+
+
+# Standard Build
+
 
 ```bash
 make
-./chip8
 ```
 
 
-# Debug 
+This will generate executable ./chip8 file 
+
+# Development Build
+
 
 ```bash
-
 make debug
-./chip8 "IBM Logo.ch8"
-# or
-# ./chip8 IBM\ Logo.ch8"
+```
 
+This will generate ./chip8 file and debug screen
+
+
+## Running a rom
+
+```bash
+./chip8 roms/<romfile.rom>
+```
+
+
+
+# Example
+```bash
+./chip8 roms/invaders.rom 
+
+# or
+
+./chip8 "roms/invaders.rom"
 
 ```
 
 
----
+**Important**: Always run from the project root so relative paths like roms/ work correctly.
+
+
+## Debug Mode
+
+
+```bash
+make debug
+./chip8 roms/"IBM Logo.ch8"
+# or using escaped space
+./chip8 roms/IBM\ Logo.ch8
+```
+
+
+
+## Cleaning after build
+
+Remove executable and debug symbols
+
+
+```bash
+make clean
+```
+
+
 
 ## Documentation & References
 
