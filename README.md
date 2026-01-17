@@ -40,7 +40,7 @@ Clone github
 git clone https://github.com/nhantran1711/chip8emulator.git
 cd chip8emulator
 ```
-
+---
 
 ## Running application
 
@@ -55,8 +55,8 @@ make
 ./chip8
 ```
 
-
-# Debug 
+---
+## Debug 
 
 ```bash
 
