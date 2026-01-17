@@ -8,6 +8,7 @@ The project uses **C++17 (GCC 15.2.0)** and **SDL3** for graphics and input.
 
 ## Table of Contents
 
+
 - [Installation](#installation)
 - [Folder Structure](#folder-structure)
 - [Building the Emulator](#building-the-emulator)
@@ -84,16 +85,16 @@ Make sure you are in the project root folder (chip8emulator) before running:
 make
 ```
 
-<<<<<<< HEAD
-
 This will generate executable ./chip8 file 
+
+
 
 # Development Build
 
-=======
+
 ---
 ## Debug 
->>>>>>> 1b4e84b7a378d75371a7b9cf9f04f8a44bb91ab9
+
 
 ```bash
 make debug
