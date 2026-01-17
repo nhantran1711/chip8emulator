@@ -22,6 +22,7 @@ typedef struct
     uint32_t bg_color; // background colour
     uint32_t scale_factor; // scale factor
     bool pixel_outlines; // Draw [pixel outline]
+    uint32_t insts_per_sec; // CPU Clock rat or hz
 } config_t;
 
 // Emulator states
@@ -75,7 +76,8 @@ bool set_config(config_t *config, const int argc, const char **argv) {
         0xFFFFFFFF, // White
         0x00000000, // Black
         10, // Scale Factor
-        true // Draw pixel outlines by default
+        true, // Draw pixel outlines by default
+        500
     };
 
     // Override default values
@@ -652,7 +654,7 @@ void emulator_instructions(chip8_t *chip8, const config_t config) {
                     chip8->V[0xF] = (chip8->V[chip8->inst.X] & 0x80) >> 7;
                     chip8->V[chip8->inst.X] <<= 1;
                     break;
-                    
+
                 case 0xE:
                     // 0x8XYE: VX <<= 1, VF = most-significant bit before shift
                     chip8->V[0xF] = (chip8->V[chip8->inst.X] & 0x80) >> 7;
@@ -947,8 +949,19 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        // Instruction for chip 8
-        emulator_instructions(&chip8, config);
+        // Get time
+        const uint64_t prev_frame = SDL_GetPerformanceCounter();
+
+        // Emulate instructions for frame
+        for (uint32 i = 0; i < config.insts_per_sec / 60; i ++) {
+            // Instruction for chip 8
+            emulator_instructions(&chip8, config);
+        }
+
+        // Get time after running application
+        uint64_t after_frame = SDL_GetPerformanceCounter();
+
+        double time_elapsed = (double) ((after_frame - prev_frame) / 1000) / SDL_GetPerformanceFrequency();
 
         // Print debug info
         #ifdef DEBUG
@@ -956,13 +969,16 @@ int main(int argc, char **argv) {
         #endif
 
         // Delay for 60fps
-        SDL_Delay(60);
+        SDL_Delay(16.67f > time_elapsed ? 16.57f - time_elapsed : 0);
 
         // Clear screen
         clear_screen(config, sdl);
 
         // Update the window with changes
         update_screen(sdl, config, chip8);
+
+        // Update delay and sound timer
+        update_timers(&chip8);
     }
 
     // Final Cleanup
